@@ -66,6 +66,7 @@ class MarkerCanvas extends React.Component {
     return (
       <MarkerCanvasProvider value={this.state}>
         <div
+          className="smw-666"
           style={staticStyles}
           onMouseMove={this.handleMouseMove}
           onMouseLeave={this.handleMouseLeave}

@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 
 import { iterateTimes } from '../utility/calendar'
 import { TimelineStateConsumer } from '../timeline/TimelineStateContext'
+import Item from '../items/Item'
 
 const passThroughPropTypes = {
   canvasTimeStart: PropTypes.number.isRequired,
@@ -12,7 +13,8 @@ const passThroughPropTypes = {
   minUnit: PropTypes.string.isRequired,
   timeSteps: PropTypes.object.isRequired,
   height: PropTypes.number.isRequired,
-  verticalLineClassNamesForTime: PropTypes.func
+  verticalLineClassNamesForTime: PropTypes.func,
+  endless: PropTypes.bool.isRequired
 }
 
 class Columns extends Component {
@@ -31,7 +33,7 @@ class Columns extends Component {
       nextProps.timeSteps === this.props.timeSteps &&
       nextProps.height === this.props.height &&
       nextProps.verticalLineClassNamesForTime ===
-        this.props.verticalLineClassNamesForTime
+      this.props.verticalLineClassNamesForTime
     )
   }
 
@@ -76,12 +78,13 @@ class Columns extends Component {
             : '') +
           classNamesForTime.join(' ')
 
-        const left = getLeftOffsetFromDate(time.valueOf())
-        const right = getLeftOffsetFromDate(nextTime.valueOf())
+        const left = getLeftOffsetFromDate(time.valueOf(), this.props.endless)
+        const right = getLeftOffsetFromDate(nextTime.valueOf(), this.props.endless)
         lines.push(
           <div
             key={`line-${time.valueOf()}`}
             className={classNames}
+            data-value={time.format('YYYY-MM-DD HH:mm:ss')}
             style={{
               pointerEvents: 'none',
               top: '0px',

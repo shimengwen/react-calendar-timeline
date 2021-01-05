@@ -12,7 +12,8 @@ class ScrollElement extends Component {
     isInteractingWithItem: PropTypes.bool.isRequired,
     onZoom: PropTypes.func.isRequired,
     onWheelZoom: PropTypes.func.isRequired,
-    onScroll: PropTypes.func.isRequired
+    onScroll: PropTypes.func.isRequired,
+    endless: PropTypes.bool.isRequired,
   }
 
   constructor() {
@@ -40,9 +41,8 @@ class ScrollElement extends Component {
   
 
   handleWheel = e => {
+    if(!this.props.endless) return;
     const { traditionalZoom } = this.props
-
-    
 
     // zoom in the time dimension
     if (e.ctrlKey || e.metaKey || e.altKey) {
@@ -63,6 +63,7 @@ class ScrollElement extends Component {
   }
 
   handleMouseDown = e => {
+    if(!this.props.endless) return;
     if (e.button === 0) {
       this.dragStartPosition = e.pageX
       this.dragLastPosition = e.pageX
@@ -73,6 +74,7 @@ class ScrollElement extends Component {
   }
 
   handleMouseMove = e => {
+    if(!this.props.endless) return;
     // this.props.onMouseMove(e)
     //why is interacting with item important?
     if (this.state.isDragging && !this.props.isInteractingWithItem) {
@@ -82,6 +84,7 @@ class ScrollElement extends Component {
   }
 
   handleMouseUp = () => {
+    if(!this.props.endless) return;
     this.dragStartPosition = null
     this.dragLastPosition = null
 
@@ -91,6 +94,7 @@ class ScrollElement extends Component {
   }
 
   handleMouseLeave = () => {
+    if(!this.props.endless) return;
     // this.props.onMouseLeave(e)
     this.dragStartPosition = null
     this.dragLastPosition = null
@@ -100,6 +104,7 @@ class ScrollElement extends Component {
   }
 
   handleTouchStart = e => {
+    if(!this.props.endless) return;
     if (e.touches.length === 2) {
       e.preventDefault()
 
@@ -121,6 +126,7 @@ class ScrollElement extends Component {
   }
 
   handleTouchMove = e => {
+    if(!this.props.endless) return;
     const { isInteractingWithItem, width, onZoom } = this.props
     if (isInteractingWithItem) {
       e.preventDefault()
@@ -159,6 +165,7 @@ class ScrollElement extends Component {
   }
 
   handleTouchEnd = () => {
+    if(!this.props.endless) return;
     if (this.lastTouchDistance) {
       this.lastTouchDistance = null
     }

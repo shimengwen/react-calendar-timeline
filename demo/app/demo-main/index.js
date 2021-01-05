@@ -15,12 +15,8 @@ import Timeline, {
 
 import generateFakeData from '../generate-fake-data'
 
-var minTime = moment()
-  .add(-6, 'months')
-  .valueOf()
-var maxTime = moment()
-  .add(6, 'months')
-  .valueOf()
+var minTime = moment().valueOf()
+var maxTime = moment().add(2, 'days').valueOf()
 
 var keys = {
   groupIdKey: 'id',
@@ -38,14 +34,11 @@ export default class App extends Component {
   constructor(props) {
     super(props)
 
-    const { groups, items } = generateFakeData()
-    const defaultTimeStart = moment()
+    const { groups, items } = generateFakeData(10)
+    const defaultTimeStart = moment().add(1, 'days')
       .startOf('day')
-      .toDate()
-    const defaultTimeEnd = moment()
-      .startOf('day')
-      .add(1, 'day')
-      .toDate()
+    const defaultTimeEnd = moment().add(1, 'days')
+      .startOf('day').add(8, 'hours')
 
     this.state = {
       groups,
@@ -93,10 +86,10 @@ export default class App extends Component {
         item =>
           item.id === itemId
             ? Object.assign({}, item, {
-                start: dragTime,
-                end: dragTime + (item.end - item.start),
-                group: group.id
-              })
+              start: dragTime,
+              end: dragTime + (item.end - item.start),
+              group: group.id
+            })
             : item
       )
     })
@@ -112,9 +105,9 @@ export default class App extends Component {
         item =>
           item.id === itemId
             ? Object.assign({}, item, {
-                start: edge === 'left' ? time : item.start,
-                end: edge === 'left' ? item.end : time
-              })
+              start: edge === 'left' ? time : item.start,
+              end: edge === 'left' ? item.end : time
+            })
             : item
       )
     })
@@ -153,8 +146,9 @@ export default class App extends Component {
         groups={groups}
         items={items}
         keys={keys}
-        sidebarWidth={150}
-        sidebarContent={<div>Above The Left</div>}
+        sidebarWidth={200}
+        minZoom={60 * 60 * 1000 * 10}
+        maxZoom={60 * 60 * 1000 * 10}
         canMove
         canResize="right"
         canSelect
@@ -175,9 +169,106 @@ export default class App extends Component {
         onItemDoubleClick={this.handleItemDoubleClick}
         onTimeChange={this.handleTimeChange}
         moveResizeValidator={this.moveResizeValidator}
+        showScroll={true}
       >
+        <TimelineHeaders>
+          <SidebarHeader>
+            {({ getRootProps }) => {
+              return <div className="left-title" {...getRootProps()}>Space</div>;
+            }}
+          </SidebarHeader>
+          <CustomHeader
+            height={22}
+            headerData={{ someData: "data" }}
+            unit="day"
+          >
+            {({
+              headerContext: { intervals },
+              getRootProps,
+              getIntervalProps,
+              showPeriod,
+            }) => {
+              return (
+                <div {...getRootProps()}>
+                  {intervals.map((interval, index) => {
+                    const intervalStyle = {
+                      lineHeight: "22px",
+                      textAlign: "center",
+                      borderLeft: "1px solid #DDD",
+                      cursor: "pointer",
+                      backgroundColor: index % 2 == 0 ? "white" : '#eee',
+                      color: "black",
+                    };
+                    return (
+                      <div
+                        {...getIntervalProps({
+                          interval,
+                          style: intervalStyle,
+                        })}
+                      >
+                        <div className="sticky bold">
+                          {interval.startTime.format("dddd, MMMM DD, YYYY")}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            }}
+          </CustomHeader>
+          <CustomHeader
+            height={22}
+            headerData={{ someData: "data" }}
+            unit="hour"
+          >{({
+            headerContext: { intervals },
+            getRootProps,
+            getIntervalProps,
+            showPeriod,
+          }) => {
+            return (
+              <div {...getRootProps()}>
+                {intervals.map((interval) => {
+                  const intervalStyle = {
+                    lineHeight: "22px",
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    borderLeft: "1px solid #ddd",
+                    borderTop: "1px solid #ddd",
+                    cursor: "pointer",
+                    backgroundColor: "white",
+                    color: "black",
+                  };
+                  return (
+                    <div
+                      onClick={() => {
+                        showPeriod(interval.startTime, interval.endTime);
+                      }}
+                      {...getIntervalProps({
+                        interval,
+                        style: intervalStyle,
+                      })}
+                    >
+                      <div className="sticky">
+                        {interval.startTime.format("HH:mm")}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }}</CustomHeader>
+        </TimelineHeaders>
         <TimelineMarkers>
-          <TodayMarker />
+            <TodayMarker>
+							{({ styles, date }) => {
+								styles.backgroundColor = 'red';
+								styles.width = '1px';
+								styles.zIndex = 100;
+								return <div className="my-time-pin" style={styles}></div>
+							}}
+						</TodayMarker>
           <CustomMarker
             date={
               moment()

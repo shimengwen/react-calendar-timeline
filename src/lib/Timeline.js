@@ -44,6 +44,8 @@ export default class ReactCalendarTimeline extends Component {
     stickyHeader: PropTypes.bool,
     lineHeight: PropTypes.number,
     itemHeightRatio: PropTypes.number,
+    endless: PropTypes.bool,
+    showScroll: PropTypes.bool,
 
     minZoom: PropTypes.number,
     maxZoom: PropTypes.number,
@@ -168,6 +170,8 @@ export default class ReactCalendarTimeline extends Component {
     stickyHeader: true,
     lineHeight: 30,
     itemHeightRatio: 0.65,
+    endless: true,
+    showScroll: false,
 
     minZoom: 60 * 60 * 1000, // 1 hour
     maxZoom: 5 * 365.24 * 86400 * 1000, // 5 years
@@ -212,14 +216,14 @@ export default class ReactCalendarTimeline extends Component {
     className: '',
     keys: defaultKeys,
     timeSteps: defaultTimeSteps,
-    headerRef: () => {},
-    scrollRef: () => {},
+    headerRef: () => { },
+    scrollRef: () => { },
 
     // if you pass in visibleTimeStart and visibleTimeEnd, you must also pass onTimeChange(visibleTimeStart, visibleTimeEnd),
     // which needs to update the props visibleTimeStart and visibleTimeEnd to the ones passed
     visibleTimeStart: null,
     visibleTimeEnd: null,
-    onTimeChange: function(
+    onTimeChange: function (
       visibleTimeStart,
       visibleTimeEnd,
       updateScrollCanvas
@@ -271,7 +275,7 @@ export default class ReactCalendarTimeline extends Component {
 
     this.getSelected = this.getSelected.bind(this)
     this.hasSelectedItem = this.hasSelectedItem.bind(this)
-    this.isItemSelected= this.isItemSelected.bind(this)
+    this.isItemSelected = this.isItemSelected.bind(this)
 
     let visibleTimeStart = null
     let visibleTimeEnd = null
@@ -411,7 +415,7 @@ export default class ReactCalendarTimeline extends Component {
         )
       )
     }
-    
+
     return derivedState
   }
 
@@ -438,13 +442,13 @@ export default class ReactCalendarTimeline extends Component {
     // Check the scroll is correct
     const scrollLeft = Math.round(
       this.state.width *
-        (this.state.visibleTimeStart - this.state.canvasTimeStart) /
-        newZoom
+      (this.state.visibleTimeStart - this.state.canvasTimeStart) /
+      newZoom
     )
     const componentScrollLeft = Math.round(
       prevState.width *
-        (prevState.visibleTimeStart - prevState.canvasTimeStart) /
-        oldZoom
+      (prevState.visibleTimeStart - prevState.canvasTimeStart) /
+      oldZoom
     )
     if (componentScrollLeft !== scrollLeft) {
       this.scrollComponent.scrollLeft = scrollLeft
@@ -497,22 +501,24 @@ export default class ReactCalendarTimeline extends Component {
 
   onScroll = scrollX => {
     const width = this.state.width
+    if (this.props.endless) {
+      const canvasTimeStart = this.state.canvasTimeStart
 
-    const canvasTimeStart = this.state.canvasTimeStart
+      const zoom = this.state.visibleTimeEnd - this.state.visibleTimeStart
 
-    const zoom = this.state.visibleTimeEnd - this.state.visibleTimeStart
-
-    const visibleTimeStart = canvasTimeStart + zoom * scrollX / width
-
-    if (
-      this.state.visibleTimeStart !== visibleTimeStart ||
-      this.state.visibleTimeEnd !== visibleTimeStart + zoom
-    ) {
-      this.props.onTimeChange(
-        visibleTimeStart,
-        visibleTimeStart + zoom,
-        this.updateScrollCanvas
-      )
+      const visibleTimeStart = canvasTimeStart + zoom * scrollX / width
+      if (
+        this.state.visibleTimeStart !== visibleTimeStart ||
+        this.state.visibleTimeEnd !== visibleTimeStart + zoom
+      ) {
+        this.props.onTimeChange(
+          visibleTimeStart,
+          visibleTimeStart + zoom,
+          this.updateScrollCanvas
+        )
+      }
+    } else {
+      console.log(scrollX, width * 3)
     }
   }
 
@@ -722,6 +728,7 @@ export default class ReactCalendarTimeline extends Component {
         minUnit={minUnit}
         timeSteps={timeSteps}
         height={height}
+        endless={this.props.endless}
         verticalLineClassNamesForTime={this.props.verticalLineClassNamesForTime}
       />
     )
@@ -837,10 +844,11 @@ export default class ReactCalendarTimeline extends Component {
   }
 
   sidebar(height, groupHeights) {
-    const { sidebarWidth } = this.props
+    const { sidebarWidth, showScroll } = this.props
     return (
       sidebarWidth && (
         <Sidebar
+          showScroll={showScroll}
           groups={this.props.groups}
           groupRenderer={this.props.groupRenderer}
           keys={this.props.keys}
@@ -874,10 +882,10 @@ export default class ReactCalendarTimeline extends Component {
    * refer to for explanation https://github.com/gaearon/react-hot-loader#checking-element-types 
    */
   isTimelineHeader = (child) => {
-    if(child.type === undefined) return false
-    return child.type.secretKey ===TimelineHeaders.secretKey
+    if (child.type === undefined) return false
+    return child.type.secretKey === TimelineHeaders.secretKey
   }
-  
+
   childrenWithProps(
     canvasTimeStart,
     canvasTimeEnd,
@@ -953,12 +961,12 @@ export default class ReactCalendarTimeline extends Component {
       : this.props.selected || [];
   }
 
-  hasSelectedItem(){
-    if(!Array.isArray(this.props.selected)) return !!this.state.selectedItem
+  hasSelectedItem() {
+    if (!Array.isArray(this.props.selected)) return !!this.state.selectedItem
     return this.props.selected.length > 0
   }
 
-  isItemSelected(itemId){
+  isItemSelected(itemId) {
     const selectedItems = this.getSelected()
     return selectedItems.some(i => i === itemId)
   }
@@ -974,7 +982,9 @@ export default class ReactCalendarTimeline extends Component {
       sidebarWidth,
       rightSidebarWidth,
       timeSteps,
-      traditionalZoom
+      traditionalZoom,
+      endless,
+      showScroll,
     } = this.props
     const {
       draggingItem,
@@ -983,7 +993,7 @@ export default class ReactCalendarTimeline extends Component {
       visibleTimeStart,
       visibleTimeEnd,
       canvasTimeStart,
-      canvasTimeEnd
+      canvasTimeEnd,
     } = this.state
     let { dimensionItems, height, groupHeights, groupTops } = this.state
 
@@ -1017,8 +1027,10 @@ export default class ReactCalendarTimeline extends Component {
       groupTops = stackResults.groupTops
     }
 
+    const new_height = showScroll == true ? height + 20 : height;
+
     const outerComponentStyle = {
-      height: `${height}px`
+      height: `${new_height}px`
     }
 
     return (
@@ -1046,7 +1058,7 @@ export default class ReactCalendarTimeline extends Component {
             >
               {this.renderHeaders()}
               <div style={outerComponentStyle} className="rct-outer">
-                {sidebarWidth > 0 ? this.sidebar(height, groupHeights) : null}
+                {sidebarWidth > 0 ? this.sidebar(new_height, groupHeights) : null}
                 <ScrollElement
                   scrollRef={this.getScrollElementRef}
                   width={width}
@@ -1056,6 +1068,7 @@ export default class ReactCalendarTimeline extends Component {
                   traditionalZoom={traditionalZoom}
                   onScroll={this.onScroll}
                   isInteractingWithItem={isInteractingWithItem}
+                  endless={endless}
                 >
                   <MarkerCanvas>
                     {this.columns(
@@ -1077,7 +1090,7 @@ export default class ReactCalendarTimeline extends Component {
                       groupHeights,
                       groupTops
                     )}
-                    {this.childrenWithProps(
+                    {endless ? this.childrenWithProps(
                       canvasTimeStart,
                       canvasTimeEnd,
                       canvasWidth,
@@ -1089,7 +1102,7 @@ export default class ReactCalendarTimeline extends Component {
                       visibleTimeEnd,
                       minUnit,
                       timeSteps
-                    )}
+                    ) : null}
                   </MarkerCanvas>
                 </ScrollElement>
                 {rightSidebarWidth > 0

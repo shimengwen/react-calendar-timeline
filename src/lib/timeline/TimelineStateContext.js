@@ -80,13 +80,14 @@ export class TimelineStateProvider extends React.Component {
     } // REVIEW,
   }
 
-  getLeftOffsetFromDate = date => {
+  getLeftOffsetFromDate = (date, endless) => {
     const { canvasTimeStart, canvasTimeEnd, canvasWidth } = this.props
     return calculateXPositionForTime(
       canvasTimeStart,
       canvasTimeEnd,
       canvasWidth,
-      date
+      date,
+      endless
     )
   }
 

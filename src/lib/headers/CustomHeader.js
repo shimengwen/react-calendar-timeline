@@ -30,7 +30,7 @@ export class CustomHeader extends React.Component {
       unit,
       timeSteps,
       showPeriod,
-      getLeftOffsetFromDate
+      getLeftOffsetFromDate,
     } = props
 
     const intervals = this.getHeaderIntervals({

@@ -74,6 +74,7 @@ class DateHeader extends React.Component {
   render() {
     const unit = this.getHeaderUnit()
     const { headerData, height } = this.props
+    
     return (
       <CustomHeader
         unit={unit}

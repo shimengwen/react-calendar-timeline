@@ -12,6 +12,7 @@ export default class Sidebar extends Component {
     keys: PropTypes.object.isRequired,
     groupRenderer: PropTypes.func,
     isRightSidebar: PropTypes.bool,
+    showScroll: PropTypes.bool,
   }
 
   shouldComponentUpdate(nextProps) {
@@ -36,7 +37,7 @@ export default class Sidebar extends Component {
   }
 
   render() {
-    const { width, groupHeights, height, isRightSidebar } = this.props
+    const { width, groupHeights, height, isRightSidebar, showScroll } = this.props
 
     const { groupIdKey, groupTitleKey, groupRightTitleKey } = this.props.keys
 
@@ -75,7 +76,7 @@ export default class Sidebar extends Component {
 
     return (
       <div
-        className={'rct-sidebar' + (isRightSidebar ? ' rct-sidebar-right' : '')}
+        className={'rct-sidebar' + (isRightSidebar ? ' rct-sidebar-right' : '' + (showScroll ? ' rct-sidebar-border-bottom': '') )}
         style={sidebarStyle}
       >
         <div style={groupsStyle}>{groupLines}</div>

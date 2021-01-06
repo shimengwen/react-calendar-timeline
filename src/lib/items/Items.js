@@ -26,6 +26,9 @@ export default class Items extends Component {
     canvasTimeStart: PropTypes.number.isRequired,
     canvasTimeEnd: PropTypes.number.isRequired,
     canvasWidth: PropTypes.number.isRequired,
+    endless: PropTypes.bool.isRequired,
+
+    cellWidth: PropTypes.number,
 
     dragSnap: PropTypes.number,
     minResizeWidth: PropTypes.number,
@@ -162,6 +165,8 @@ export default class Items extends Component {
               onSelect={this.props.itemSelect}
               itemRenderer={this.props.itemRenderer}
               scrollRef={this.props.scrollRef}
+              endless={this.props.endless}
+              cellWidth={this.props.cellWidth}
             />
           ))}
       </div>

@@ -27,7 +27,9 @@ export default class Item extends Component {
     canvasTimeStart: PropTypes.number.isRequired,
     canvasTimeEnd: PropTypes.number.isRequired,
     canvasWidth: PropTypes.number.isRequired,
+    endless: PropTypes.bool.isRequired,
     order: PropTypes.object,
+    cellWidth: PropTypes.number,
 
     dragSnap: PropTypes.number,
     minResizeWidth: PropTypes.number,

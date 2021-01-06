@@ -34,7 +34,7 @@ export default class App extends Component {
   constructor(props) {
     super(props)
 
-    const { groups, items } = generateFakeData(10)
+    const { groups, items } = generateFakeData(5)
     const defaultTimeStart = moment().add(1, 'days')
       .startOf('day')
     const defaultTimeEnd = moment().add(1, 'days')
@@ -158,6 +158,8 @@ export default class App extends Component {
         itemHeightRatio={0.75}
         defaultTimeStart={defaultTimeStart}
         defaultTimeEnd={defaultTimeEnd}
+        visibleTimeStart={minTime}
+        visibleTimeEnd={maxTime}
         onCanvasClick={this.handleCanvasClick}
         onCanvasDoubleClick={this.handleCanvasDoubleClick}
         onCanvasContextMenu={this.handleCanvasContextMenu}
@@ -170,6 +172,8 @@ export default class App extends Component {
         onTimeChange={this.handleTimeChange}
         moveResizeValidator={this.moveResizeValidator}
         showScroll={true}
+        endless={false}
+        cellWidth={100}
       >
         <TimelineHeaders>
           <SidebarHeader>

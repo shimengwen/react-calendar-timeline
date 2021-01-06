@@ -29,12 +29,16 @@ export function calculateXPositionForTime(
   canvasTimeStart,
   canvasTimeEnd,
   canvasWidth,
-  time
+  time,
+  endless,
+  cellWidth,
+  minUnit,
+  timeSteps
 ) {
-  const widthToZoomRatio = canvasWidth / (canvasTimeEnd - canvasTimeStart)
+  const allWidth = iterateTimes(canvasTimeStart, canvasTimeEnd, minUnit, timeSteps) * cellWidth;
+  const widthToZoomRatio = endless ? canvasWidth / (canvasTimeEnd - canvasTimeStart) : allWidth / (canvasTimeEnd - canvasTimeStart);
   const timeOffset = time - canvasTimeStart
-
-  return timeOffset * widthToZoomRatio
+  return timeOffset * widthToZoomRatio;
 }
 
 /**
@@ -61,17 +65,20 @@ export function calculateTimeForXPosition(
 
 export function iterateTimes(start, end, unit, timeSteps, callback) {
   let time = moment(start).startOf(unit)
-
-  if (timeSteps[unit] && timeSteps[unit] > 1) {
-    let value = time.get(unit)
-    time.set(unit, value - value % timeSteps[unit])
+  let num = 0;
+  if (unit && timeSteps) {
+    if (timeSteps[unit] && timeSteps[unit] > 1) {
+      let value = time.get(unit)
+      time.set(unit, value - value % timeSteps[unit])
+    }
+    while (time.valueOf() < end) {
+      let nextTime = moment(time).add(timeSteps[unit] || 1, `${unit}s`)
+      callback && callback(time, nextTime)
+      time = nextTime
+      num++;
+    }
   }
-
-  while (time.valueOf() < end) {
-    let nextTime = moment(time).add(timeSteps[unit] || 1, `${unit}s`)
-    callback(time, nextTime)
-    time = nextTime
-  }
+  return num;
 }
 
 // this function is VERY HOT as its used in Timeline.js render function
@@ -175,7 +182,7 @@ export function calculateInteractionNewTimes({
   isDragging,
   isResizing,
   resizingEdge,
-  resizeTime
+  resizeTime,
 }) {
   const originalItemRange = itemTimeEnd - itemTimeStart
   const itemStart =
@@ -193,7 +200,11 @@ export function calculateDimensions({
   itemTimeEnd,
   canvasTimeStart,
   canvasTimeEnd,
-  canvasWidth
+  canvasWidth,
+  endless,
+  cellWidth,
+  minUnit,
+  timeSteps
 }) {
   const itemTimeRange = itemTimeEnd - itemTimeStart
 
@@ -205,13 +216,21 @@ export function calculateDimensions({
     canvasTimeStart,
     canvasTimeEnd,
     canvasWidth,
-    effectiveStartTime
+    effectiveStartTime,
+    endless,
+    cellWidth,
+    minUnit,
+    timeSteps
   )
   const right = calculateXPositionForTime(
     canvasTimeStart,
     canvasTimeEnd,
     canvasWidth,
-    effectiveEndTime
+    effectiveEndTime,
+    endless,
+    cellWidth,
+    minUnit,
+    timeSteps
   )
   const itemWidth = right - left
 
@@ -402,7 +421,7 @@ export function stackAll(itemsDimensions, groupOrders, lineHeight, stackItems) {
       groupHeights.push(Math.max(groupHeight, lineHeight))
     }
   }
-  
+
   return {
     height: sum(groupHeights),
     groupHeights,
@@ -475,7 +494,11 @@ export function stackTimelineItems(
   dragTime,
   resizingEdge,
   resizeTime,
-  newGroupOrder
+  newGroupOrder,
+  endless,
+  cellWidth,
+  minUnit,
+  timeSteps
 ) {
   const visibleItems = getVisibleItems(
     items,
@@ -519,7 +542,11 @@ export function stackTimelineItems(
         canvasWidth,
         groupOrders,
         lineHeight,
-        itemHeightRatio
+        itemHeightRatio,
+        endless,
+        cellWidth,
+        minUnit,
+        timeSteps
       })
     )
     .filter(item => !!item)
@@ -561,7 +588,11 @@ export function getItemDimensions({
   canvasWidth,
   groupOrders,
   lineHeight,
-  itemHeightRatio
+  itemHeightRatio,
+  endless,
+  cellWidth,
+  minUnit,
+  timeSteps
 }) {
   const itemId = _get(item, keys.itemIdKey)
   let dimension = calculateDimensions({
@@ -569,7 +600,11 @@ export function getItemDimensions({
     itemTimeEnd: _get(item, keys.itemTimeEndKey),
     canvasTimeStart,
     canvasTimeEnd,
-    canvasWidth
+    canvasWidth,
+    endless,
+    cellWidth,
+    minUnit,
+    timeSteps
   })
   if (dimension) {
     dimension.top = null
@@ -595,6 +630,8 @@ export function getItemDimensions({
  * @param {*} resizeTime
  * @param {*} groups
  * @param {*} newGroupOrder
+ * @param {*} endless
+ * @param {*} cellWidth
  */
 export function getItemWithInteractions({
   item,
@@ -605,7 +642,7 @@ export function getItemWithInteractions({
   resizingEdge,
   resizeTime,
   groups,
-  newGroupOrder
+  newGroupOrder,
 }) {
   if (!resizingItem && !draggingItem) return item
   const itemId = _get(item, keys.itemIdKey)
@@ -618,7 +655,7 @@ export function getItemWithInteractions({
     isResizing,
     dragTime,
     resizingEdge,
-    resizeTime
+    resizeTime,
   })
   const newItem = {
     ...item,
@@ -693,6 +730,7 @@ export function calculateScrollCanvas(
     }
 
     const canvasWidth = getCanvasWidth(mergedState.width)
+    const minUnit = getMinUnit(newZoom, state.width, props.timeSteps)
 
     // The canvas cannot be kept, so calculate the new items position
     Object.assign(
@@ -712,7 +750,11 @@ export function calculateScrollCanvas(
         mergedState.dragTime,
         mergedState.resizingEdge,
         mergedState.resizeTime,
-        mergedState.newGroupOrder
+        mergedState.newGroupOrder,
+        props.endless,
+        props.cellWidth,
+        minUnit,
+        props.timeSteps,
       )
     )
   }

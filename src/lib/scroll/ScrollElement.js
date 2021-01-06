@@ -191,7 +191,6 @@ class ScrollElement extends Component {
       cursor: isDragging ? 'move' : 'default',
       position: 'relative'
     }
-
     return (
       <div
         ref={this.refHandler}

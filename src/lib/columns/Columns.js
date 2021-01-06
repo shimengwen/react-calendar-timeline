@@ -14,7 +14,8 @@ const passThroughPropTypes = {
   timeSteps: PropTypes.object.isRequired,
   height: PropTypes.number.isRequired,
   verticalLineClassNamesForTime: PropTypes.func,
-  endless: PropTypes.bool.isRequired
+  endless: PropTypes.bool.isRequired,
+  cellWidth: PropTypes.number
 }
 
 class Columns extends Component {
@@ -46,7 +47,9 @@ class Columns extends Component {
       timeSteps,
       height,
       verticalLineClassNamesForTime,
-      getLeftOffsetFromDate
+      getLeftOffsetFromDate,
+      endless,
+      cellWidth,
     } = this.props
     const ratio = canvasWidth / (canvasTimeEnd - canvasTimeStart)
 
@@ -88,8 +91,8 @@ class Columns extends Component {
             style={{
               pointerEvents: 'none',
               top: '0px',
-              left: `${left}px`,
-              width: `${right - left}px`,
+              left: `${endless ? left : lines.length * cellWidth}px`,
+              width: `${endless ? right - left : cellWidth}px`,
               height: `${height}px`
             }}
           />

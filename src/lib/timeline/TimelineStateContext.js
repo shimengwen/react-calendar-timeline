@@ -44,6 +44,11 @@ export class TimelineStateProvider extends React.Component {
     showPeriod: PropTypes.func.isRequired,
     timelineUnit: PropTypes.string.isRequired,
     timelineWidth: PropTypes.number.isRequired,
+    endless: PropTypes.bool.isRequired,
+    cellWidth: PropTypes.number,
+    minUnit: PropTypes.string,
+    timeSteps: PropTypes.object
+
   }
 
   constructor(props) {
@@ -80,24 +85,25 @@ export class TimelineStateProvider extends React.Component {
     } // REVIEW,
   }
 
-  getLeftOffsetFromDate = (date, endless) => {
-    const { canvasTimeStart, canvasTimeEnd, canvasWidth } = this.props
+  getLeftOffsetFromDate = (date) => {
+    const { canvasTimeStart, canvasTimeEnd, canvasWidth, endless, cellWidth, minUnit, timeSteps } = this.props
     return calculateXPositionForTime(
       canvasTimeStart,
       canvasTimeEnd,
       canvasWidth,
       date,
-      endless
+      endless, cellWidth, minUnit, timeSteps
     )
   }
 
   getDateFromLeftOffsetPosition = leftOffset => {
-    const { canvasTimeStart, canvasTimeEnd, canvasWidth } = this.props
+    const { canvasTimeStart, canvasTimeEnd, canvasWidth, endless, cellWidth, minUnit, timeSteps } = this.props
     return calculateTimeForXPosition(
       canvasTimeStart,
       canvasTimeEnd,
       canvasWidth,
-      leftOffset
+      leftOffset,
+      endless, cellWidth, minUnit, timeSteps
     )
   }
 

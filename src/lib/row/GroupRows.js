@@ -1,9 +1,15 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import GroupRow from './GroupRow'
+import { iterateTimes } from '../utility/calendar'
 
 export default class GroupRows extends Component {
   static propTypes = {
+    canvasTimeStart: PropTypes.number.isRequired,
+    canvasTimeEnd: PropTypes.number.isRequired,
+    minUnit: PropTypes.string.isRequired,
+    timeSteps: PropTypes.object.isRequired,
+
     canvasWidth: PropTypes.number.isRequired,
     lineCount: PropTypes.number.isRequired,
     groupHeights: PropTypes.array.isRequired,
@@ -35,8 +41,20 @@ export default class GroupRows extends Component {
       groups,
       horizontalLineClassNamesForGroup,
       onRowContextClick,
+      canvasTimeStart,
+      canvasTimeEnd,
+      minUnit,
+      timeSteps,
+      endless,
+      cellWidth
     } = this.props
     let lines = []
+    let colNum = iterateTimes(
+      canvasTimeStart,
+      canvasTimeEnd,
+      minUnit,
+      timeSteps
+    )
 
     for (let i = 0; i < lineCount; i++) {
       lines.push(
@@ -50,7 +68,7 @@ export default class GroupRows extends Component {
           group={groups[i]}
           horizontalLineClassNamesForGroup={horizontalLineClassNamesForGroup}
           style={{
-            width: `${canvasWidth}px`,
+            width: `${endless ? canvasWidth : colNum * cellWidth}px`,
             height: `${groupHeights[i]}px`
           }}
         />

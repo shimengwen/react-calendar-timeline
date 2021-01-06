@@ -114,6 +114,7 @@ export class CustomHeader extends React.Component {
         const left = getLeftOffsetFromDate(startTime.valueOf())
         const right = getLeftOffsetFromDate(endTime.valueOf())
         const width = right - left
+
         intervals.push({
           startTime,
           endTime,
@@ -197,7 +198,7 @@ export class CustomHeader extends React.Component {
   render() {
     const props = this.getStateAndHelpers()
     const Renderer = this.props.children
-    return <Renderer {...props}/>
+    return <Renderer {...props} />
   }
 }
 
